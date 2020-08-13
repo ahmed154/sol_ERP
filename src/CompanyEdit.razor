@@ -1,0 +1,54 @@
+@page "/company/edit/{id:int}"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/company" style="color:#6372C4">Companys</a>  /  @id</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/company/@id"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <CompanyForm CompanyVM="CompanyVM" ecb_Save="Update" Type="Edit" @ref="Form"/>
+</div>
+
+    @code {
+
+        [Inject] public ICompanyService CompanyService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+        [Parameter] public int id { get; set; }
+
+        CompanyVM CompanyVM { get; set; } = new CompanyVM();
+        protected CompanyForm Form;
+
+        protected override async Task OnInitializedAsync()
+        {
+            CompanyVM = await CompanyService.GetCompany(id);
+        }
+
+        private async Task Save()
+        {
+            await Form.ParentSubmit();
+        }
+
+        private async Task Update()
+        {
+            CompanyVM.Exception = null;
+            CompanyVM updatedCompanyVM = await CompanyService.UpdateCompany(CompanyVM.Company.Id, CompanyVM);
+
+            if (string.IsNullOrEmpty(updatedCompanyVM.Exception))
+            {
+                await JSRuntime.Notfication($"Companyment {CompanyVM.Company.Name} has been updated successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/company/{updatedCompanyVM.Company.Id}");
+            }
+            else
+            {
+                await JSRuntime.Notfication(updatedCompanyVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

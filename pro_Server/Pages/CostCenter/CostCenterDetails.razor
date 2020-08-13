@@ -1,0 +1,54 @@
+@page "/costcenter/{id:int}"
+
+    <div class="container bg-white rounded border p-3">
+        <div class="pl-3">
+            <div class="row">
+                <span style="font-size:18px; color:#8f8f8f;"><a href="/costcenter" style="color:#6372C4">CostCenters</a> /  @id</span>
+            </div>
+            <div class="row pt-4">
+                <a class="btn btn-primary" href="/costcenter/edit/@id" style="background-color:#6372C4"><i class="far fa-edit"></i> Edit</a>
+                <a class="btn border ml-1" href="/costcenter/new"><i class="far fa-file"></i> New</a>
+                <button class="btn border ml-5" @onclick="DeleteConfirm"><i class="far fa-trash-alt"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container bg-white border box-shadow p-3 rounded">
+        <CostCenterForm CostCenterVM="CostCenterVM" Type="Details" />
+    </div>
+
+
+    @code {
+
+        [Parameter] public int id { get; set; }
+        [Inject] public ICostCenterService CostCenterService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+
+        CostCenterVM CostCenterVM { get; set; } = new CostCenterVM();
+
+        protected override async Task OnInitializedAsync()
+        {
+            CostCenterVM = await CostCenterService.GetCostCenter(id);
+        }
+
+        protected async Task DeleteConfirm()
+        {
+            bool result = await JSRuntime.Confirm("Confirmation", $"Are you sure you want to delete {CostCenterVM.CostCenter.Name} ?", IJSRuntimeExtensionMethods.SweetAlertMessageType.question);
+            if (result) await Delete();  
+        }
+        protected async Task Delete()
+        {
+            CostCenterVM createdCostCenterVM = await CostCenterService.DeleteCostCenter(CostCenterVM.CostCenter.Id);
+
+            if (string.IsNullOrEmpty(createdCostCenterVM.Exception))
+            {
+                await JSRuntime.Notfication($"CostCenterment {CostCenterVM.CostCenter.Name} has been deleted successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/costcenter");
+            }
+            else
+            {
+                await JSRuntime.Notfication(createdCostCenterVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

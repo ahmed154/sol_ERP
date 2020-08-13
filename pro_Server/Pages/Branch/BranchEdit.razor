@@ -1,0 +1,54 @@
+@page "/branch/edit/{id:int}"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/branch" style="color:#6372C4">Branchs</a>  /  @id</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/branch/@id"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <BranchForm BranchVM="BranchVM" ecb_Save="Update" Type="Edit" @ref="Form"/>
+</div>
+
+    @code {
+
+        [Inject] public IBranchService BranchService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+        [Parameter] public int id { get; set; }
+
+        BranchVM BranchVM { get; set; } = new BranchVM();
+        protected BranchForm Form;
+
+        protected override async Task OnInitializedAsync()
+        {
+            BranchVM = await BranchService.GetBranch(id);
+        }
+
+        private async Task Save()
+        {
+            await Form.ParentSubmit();
+        }
+
+        private async Task Update()
+        {
+            BranchVM.Exception = null;
+            BranchVM updatedBranchVM = await BranchService.UpdateBranch(BranchVM.Branch.Id, BranchVM);
+
+            if (string.IsNullOrEmpty(updatedBranchVM.Exception))
+            {
+                await JSRuntime.Notfication($"Branchment {BranchVM.Branch.Name} has been updated successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/branch/{updatedBranchVM.Branch.Id}");
+            }
+            else
+            {
+                await JSRuntime.Notfication(updatedBranchVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

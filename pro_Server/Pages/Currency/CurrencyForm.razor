@@ -1,0 +1,154 @@
+@using Syncfusion.Blazor.Inputs
+
+<EditForm Model="CurrencyVM" Context="formContext">
+    <ObjectGraphDataAnnotationsValidator />
+
+    <div class="container border p-3">
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                <SfTextBox id="name" Placeholder="Name" Readonly="@bol_ReadOnly" FloatLabelType="@FloatLabelType.Auto" @bind-Value="@CurrencyVM.Currency.Name"></SfTextBox>
+                <ValidationMessage For="@(() => CurrencyVM.Currency.Name)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                <SfTextBox Placeholder="Code" Readonly="@bol_ReadOnly" FloatLabelType="@FloatLabelType.Auto" @bind-Value="@CurrencyVM.Currency.Code"></SfTextBox>
+                <ValidationMessage For="@(() => CurrencyVM.Currency.Code)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                <SfTextBox Placeholder="Symbol" Readonly="@bol_ReadOnly" FloatLabelType="@FloatLabelType.Auto" @bind-Value="@CurrencyVM.Currency.Symbol"></SfTextBox>
+                <ValidationMessage For="@(() => CurrencyVM.Currency.Symbol)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                <SfNumericTextBox Placeholder="Price" Readonly="@bol_ReadOnly" FloatLabelType="@FloatLabelType.Auto" @bind-Value="@CurrencyVM.Currency.Price"></SfNumericTextBox>
+                <ValidationMessage For="@(() => CurrencyVM.Currency.Price)" />
+            </div>
+        </div>
+    </div>
+
+    <button id="sub" type="submit" hidden @onclick=@(() => Submit(formContext))>Submit</button>
+</EditForm>
+
+@code {
+    public Query Query = new Query();
+
+    [CascadingParameter] public MainLayout.AppParam appParam { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Parameter] public CurrencyVM CurrencyVM { get; set; } = new CurrencyVM();
+    [Parameter] public EventCallback<CurrencyVM> ecb_Save { get; set; }
+
+    [Parameter] public string Type { get; set; }
+
+
+    protected bool bol_ReadOnly { get; set; } = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (Type == "Details")
+            {
+                bol_ReadOnly = true;
+                StateHasChanged();
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("FocusElement", "name");
+            }
+        }
+    }
+
+    public async Task ParentSubmit()
+    {
+        await JSRuntime.InvokeVoidAsync("SubmitForm", "sub");
+    }
+
+    public async Task Submit(EditContext formContext)
+    {
+        if (!formContext.Validate()) return;
+        await ecb_Save.InvokeAsync(CurrencyVM);
+    }
+}
+
+<style>
+    .lbl {
+        font-size: 14px;
+        color: gray;
+        width: 100%;
+        text-align: right;
+        background-color: whitesmoke;
+    }
+</style>
+<style>
+    .e-input-picture::before {
+        content: '\e335';
+        font-family: e-icons;
+    }
+
+    .e-input-calendar::before {
+        content: '\e901';
+        font-family: e-icons;
+        font-size: 13px;
+    }
+
+    .content-wrapper {
+        width: 90%;
+        margin: 0 auto;
+        min-width: 85px;
+    }
+
+        .content-wrapper div.row {
+            padding: 15px 0px;
+        }
+
+    .custom-padding-05 {
+        padding-top: 5px;
+    }
+
+    @@media only screen and (max-width: 480px) {
+        .content-wrapper {
+            width: 92%;
+        }
+
+        .col-xs-6,
+        .col-xs-4,
+        .col-xs-12 {
+            padding: 10px 5px;
+            width: 100%;
+        }
+
+        .content-wrapper div.row {
+            padding: 0px;
+        }
+    }
+
+    #description td {
+        vertical-align: top;
+    }
+
+    .e-outline.e-float-input,
+    .e-outline.e-float-input.e-control-wrapper {
+        margin-top: 0;
+    }
+
+    .fabric .row.material2,
+    .bootstrap .row.material2,
+    .bootstrap4 .row.material2,
+    .highcontrast .row.material2 {
+        display: none;
+    }
+
+    .e-upload-picture::before {
+        content: '\e335';
+        font-family: e-icons;
+    }
+
+    .bootstrap4 .e-upload-picture::before {
+        content: '\e769';
+        font-family: e-icons;
+    }
+</style>

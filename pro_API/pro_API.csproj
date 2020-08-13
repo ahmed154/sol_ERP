@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\**" />
+    <Content Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20200809163250_Currency.cs" />
+    <Compile Remove="Migrations\20200809163250_Currency.Designer.cs" />
+    <Compile Remove="Migrations\20200811023949_tbl_Company.cs" />
+    <Compile Remove="Migrations\20200811023949_tbl_Company.Designer.cs" />
+    <Compile Remove="Migrations\20200811144752_Fyear.cs" />
+    <Compile Remove="Migrations\20200811144752_Fyear.Designer.cs" />
+    <Compile Remove="Migrations\20200813010105_CostCenter.cs" />
+    <Compile Remove="Migrations\20200813010105_CostCenter.Designer.cs" />
+    <Compile Remove="Migrations\20200813021440_Branch.cs" />
+    <Compile Remove="Migrations\20200813021440_Branch.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\pro_Models\pro_Models.csproj" />
+  </ItemGroup>
+
+
+</Project>

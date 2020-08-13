@@ -1,0 +1,65 @@
+﻿
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-xl-3 col-lg-3" style="background-color: #F2F3F4;">
+                <a class="navbar-brand mr-5" asp-area="" asp-page="" href="">
+                <span style="        
+                font-size: 19px;
+                color: #6372C4;">
+                Attendance</span> Manager</a>
+            </div>
+
+            <div class="col-xl-7 col-lg-7">
+                <button class="navbar-toggler" @onclick="ToggleNavMenu" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="@NavMenuCssClass navbar-collapse d-sm-inline-flex flex-sm-row-reverse" @onclick="ToggleNavMenu">
+                    <ul class="navbar-nav flex-grow-1">
+
+                        <AttBasicDatatDropdown>
+                            <InitialTip>Basic Data</InitialTip>
+                        </AttBasicDatatDropdown>
+
+                        <AttImportDataDropdown>
+                            <InitialTip>Import Data</InitialTip>
+                        </AttImportDataDropdown>
+
+                        <AttReportsDropdown>
+                            <InitialTip>Reports</InitialTip>
+                        </AttReportsDropdown>
+
+                        <AttSettingsDropdown>
+                            <InitialTip>Settings</InitialTip>
+                        </AttSettingsDropdown>
+                
+                        <li class="nav-item d-block d-sm-none">
+                            <LoginDisplay />
+                        </li>           
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-2">
+                <div class="px-4 d-none d-sm-block">
+                    <LoginDisplay />
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+
+    bool collapseNavMenu = true;
+
+    string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

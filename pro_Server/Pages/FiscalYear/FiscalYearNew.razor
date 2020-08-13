@@ -1,0 +1,48 @@
+@page "/fiscalyear/new"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/fiscalyear" style="color:#6372C4">FiscalYears</a> /  New</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/fiscalyear"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <FiscalYearForm FiscalYearVM="FiscalYearVM" ecb_Save="Create" Type="New" @ref="Form" />
+</div>
+
+
+@code
+{
+    [Inject] public IFiscalYearService FiscalYearService { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+
+    protected FiscalYearForm Form;
+    FiscalYearVM FiscalYearVM { get; set; } = new FiscalYearVM();
+
+    private async Task Save()
+    {
+        await Form.ParentSubmit();
+    }
+    private async Task Create()
+    {
+        FiscalYearVM.Exception = null;
+        FiscalYearVM createdFiscalYearVM = await FiscalYearService.CreateFiscalYear(FiscalYearVM);
+
+        if (string.IsNullOrEmpty(createdFiscalYearVM.Exception))
+        {
+            await JSRuntime.Notfication($"FiscalYear {FiscalYearVM.FiscalYear.Name} has been created successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+            NavigationManager.NavigateTo($"/fiscalyear/{createdFiscalYearVM.FiscalYear.Id}");
+        }
+        else
+        {
+            await JSRuntime.Notfication(createdFiscalYearVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+        }
+    }
+}

@@ -1,0 +1,54 @@
+@page "/currency/edit/{id:int}"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/currency" style="color:#6372C4">Currencys</a>  /  @id</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/currency/@id"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <CurrencyForm CurrencyVM="CurrencyVM" ecb_Save="Update" Type="Edit" @ref="Form"/>
+</div>
+
+    @code {
+
+        [Inject] public ICurrencyService CurrencyService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+        [Parameter] public int id { get; set; }
+
+        CurrencyVM CurrencyVM { get; set; } = new CurrencyVM();
+        protected CurrencyForm Form;
+
+        protected override async Task OnInitializedAsync()
+        {
+            CurrencyVM = await CurrencyService.GetCurrency(id);
+        }
+
+        private async Task Save()
+        {
+            await Form.ParentSubmit();
+        }
+
+        private async Task Update()
+        {
+            CurrencyVM.Exception = null;
+            CurrencyVM updatedCurrencyVM = await CurrencyService.UpdateCurrency(CurrencyVM.Currency.Id, CurrencyVM);
+
+            if (string.IsNullOrEmpty(updatedCurrencyVM.Exception))
+            {
+                await JSRuntime.Notfication($"Currencyment {CurrencyVM.Currency.Name} has been updated successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/currency/{updatedCurrencyVM.Currency.Id}");
+            }
+            else
+            {
+                await JSRuntime.Notfication(updatedCurrencyVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

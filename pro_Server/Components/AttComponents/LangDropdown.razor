@@ -1,0 +1,76 @@
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<div class="dropdown" style="margin-top:2px;">
+    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button"
+            style="background-color:transparent; color:#343a40; border:none;"
+            @onclick="e => this.show=!this.show"
+            @onfocusout=@(e => this.show=menuState)
+            aria-haspopup="true" aria-expanded="false">
+        @Tip
+        @Lang
+    </button>
+
+    <div class="dropdown-menu @(show? "show":"")"
+         @onmouseover=@(()=> menuState = true)
+         @onmouseout=@(()=> menuState = false)>
+
+        <button class="dropdown-item" @onclick=@(()=> SetLang("ar-SA"))>
+            <i class="far fa-flag"></i>&ensp; عربي
+        </button>
+        <button class="dropdown-item" @onclick=@(()=> SetLang("en-US"))>
+            <i class="fas fa-flag"></i>&ensp; English
+        </button>
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public RenderFragment InitialTip { get; set; }
+    [Inject] public ILanguageContainerService LCS { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+
+    private bool show = false;
+    private bool menuState = false;
+    private RenderFragment Tip;
+    private string CultureCode;
+    private string Lang;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Tip = InitialTip;
+        await GetCultureCode();
+    }
+
+    async Task GetCultureCode()
+    {
+        CultureCode = await JSRuntime.GetFromLocalStorage("CultureCode");
+
+        if (string.IsNullOrEmpty(CultureCode))
+        {
+            CultureCode = "ar-SA";
+            LCS.SetLanguage(System.Globalization.CultureInfo.GetCultureInfo(CultureCode));
+            await JSRuntime.SetInLocalStorage("CultureCode", CultureCode);
+            Lang = "عربي";
+        }
+        else if (CultureCode == "ar-SA")
+        {
+            Lang = "عربي";
+        }
+        else if (CultureCode == "en-US")
+        {
+            Lang = "English";
+        }
+    }
+
+    async Task SetLang(string cultureCode)
+    {
+        show = false;
+        LCS.SetLanguage(System.Globalization.CultureInfo.GetCultureInfo(cultureCode));
+        await JSRuntime.SetInLocalStorage("CultureCode", cultureCode);
+        await GetCultureCode();
+        await JSRuntime.ReloadPage();
+    }
+
+}

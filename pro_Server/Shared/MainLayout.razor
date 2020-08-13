@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+
+    <CascadingValue Value="@appParam">
+        <div>
+            <NavMenu />
+        </div>
+
+        <div class="main">
+
+            <div class="content px-4">
+                @Body
+            </div>
+        </div>
+    </CascadingValue>
+
+
+@code
+{
+    public AppParam appParam { get; set; } = new AppParam();
+    public int MyProperty { get; set; }
+
+    public class AppParam
+    {
+        //public string APIUrl { get; set; } = "http://ahmed154-001-site4.etempurl.com";
+        public string APIUrl { get; set; } = "https://localhost:44305";
+    }
+}

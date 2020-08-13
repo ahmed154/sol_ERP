@@ -1,0 +1,70 @@
+@page "/company"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;">Companys</span>
+        </div>
+        <div class="row pt-4">
+            <a class="btn btn-primary" href="/company/new" style="background-color:#6372C4"><i class="far fa-file"></i> New</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    @if (CompanyVMs == null)
+    {
+        <p style="color:gray;">Loading ...</p>
+    }
+    else if (CompanyVMs.Count() == 0)
+    {
+        <p style="color:gray;">No records to display.</p>
+    }
+    else
+    {
+        <SfGrid DataSource="@CompanyVMs" AllowPaging="true" AllowSorting="true">
+            <GridEvents RowSelected="RowSelectHandler" TValue="CompanyVM"></GridEvents>
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="Company.Id" HeaderText="ID" Width="50" />
+                <GridColumn Field="Company.Name" HeaderText="Name" Width="200" />
+            </GridColumns>
+        </SfGrid>
+    }
+</div>
+
+
+@code 
+{
+    [Inject] public ICompanyService CompanyService { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    public List<CompanyVM> CompanyVMs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CompanyVMs =(await CompanyService.GetCompanys()).OrderByDescending(x => x.Company.Id).ToList();
+        if (CompanyVMs.Count > 0 && !string.IsNullOrEmpty(CompanyVMs[0].Exception))
+        {
+            await JSRuntime.Notfication(CompanyVMs[0].Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+        }
+    }
+
+    public void RowSelectHandler(RowSelectEventArgs<CompanyVM> args)
+    {
+        NavigationManager.NavigateTo($"company/{args.Data.Company.Id}");
+    }
+}
+
+
+ <style>
+            .e-grid .e-headercelldiv {
+                background-color: #F2F3F4;
+                font-size: 16px;
+            }
+
+            .e-grid .e-rowcell {
+                font-size: 14px;
+            }
+ </style>

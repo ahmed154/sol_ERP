@@ -1,0 +1,54 @@
+@page "/fiscalyear/{id:int}"
+
+    <div class="container bg-white rounded border p-3">
+        <div class="pl-3">
+            <div class="row">
+                <span style="font-size:18px; color:#8f8f8f;"><a href="/fiscalyear" style="color:#6372C4">FiscalYears</a> /  @id</span>
+            </div>
+            <div class="row pt-4">
+                <a class="btn btn-primary" href="/fiscalyear/edit/@id" style="background-color:#6372C4"><i class="far fa-edit"></i> Edit</a>
+                <a class="btn border ml-1" href="/fiscalyear/new"><i class="far fa-file"></i> New</a>
+                <button class="btn border ml-5" @onclick="DeleteConfirm"><i class="far fa-trash-alt"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container bg-white border box-shadow p-3 rounded">
+        <FiscalYearForm FiscalYearVM="FiscalYearVM" Type="Details" />
+    </div>
+
+
+    @code {
+
+        [Parameter] public int id { get; set; }
+        [Inject] public IFiscalYearService FiscalYearService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+
+        FiscalYearVM FiscalYearVM { get; set; } = new FiscalYearVM();
+
+        protected override async Task OnInitializedAsync()
+        {
+            FiscalYearVM = await FiscalYearService.GetFiscalYear(id);
+        }
+
+        protected async Task DeleteConfirm()
+        {
+            bool result = await JSRuntime.Confirm("Confirmation", $"Are you sure you want to delete {FiscalYearVM.FiscalYear.Name} ?", IJSRuntimeExtensionMethods.SweetAlertMessageType.question);
+            if (result) await Delete();  
+        }
+        protected async Task Delete()
+        {
+            FiscalYearVM createdFiscalYearVM = await FiscalYearService.DeleteFiscalYear(FiscalYearVM.FiscalYear.Id);
+
+            if (string.IsNullOrEmpty(createdFiscalYearVM.Exception))
+            {
+                await JSRuntime.Notfication($"FiscalYearment {FiscalYearVM.FiscalYear.Name} has been deleted successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/fiscalyear");
+            }
+            else
+            {
+                await JSRuntime.Notfication(createdFiscalYearVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

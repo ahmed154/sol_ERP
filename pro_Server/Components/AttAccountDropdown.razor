@@ -1,0 +1,49 @@
+﻿@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button"
+            style="background-color:transparent; color:#343a40; border:none;"
+            @onclick="e => this.show=!this.show"
+            @onfocusout=@(e => this.show=mouseOver)
+            aria-haspopup="true" aria-expanded="false">
+        @Tip
+    </button>
+
+    <div class="dropdown-menu @(show? "show":"")"
+         @onmouseover=@(()=> mouseOver = true)
+         @onmouseout=@(()=> mouseOver = false)>
+
+        <button class="dropdown-item" @onclick=@(()=>show = false)>
+            &ensp; Dashboard
+        </button>
+        <button class="dropdown-item" @onclick=@(()=>show = false)>
+             &ensp; User Settings
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" @onclick="Logout">
+            <i class="fas fa-sign-out-alt"></i> &ensp; Log Out
+        </button>
+
+    </div>
+</div>
+
+@code {
+
+    [Parameter]public RenderFragment InitialTip { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    private bool show = false;
+    private bool mouseOver = false;
+    private RenderFragment Tip;
+
+    protected override void OnInitialized() { this.Tip = InitialTip; }
+
+
+    public async Task Logout()
+    {
+        await ((pro_Server.Auth.JWTAuthenticationStateProvider)AuthenticationStateProvider).Logout();
+        NavigationManager.NavigateTo("");
+    }
+}

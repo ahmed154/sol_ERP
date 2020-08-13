@@ -1,0 +1,56 @@
+@page "/branch/new"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/branch" style="color:#6372C4">Branchs</a> /  New</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/branch"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <BranchForm BranchVM="BranchVM" ecb_Save="Create" Type="New" @ref="Form" />
+</div>
+
+
+@code
+{
+    [Inject] public IBranchService BranchService { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+
+
+    protected BranchForm Form;
+    BranchVM BranchVM { get; set; } = new BranchVM();
+
+    protected override async Task OnInitializedAsync()
+    {
+        int count = (await BranchService.GetBranchs()).OrderByDescending(x => x.Branch.Id).ToList().Count() + 1;
+        BranchVM.Branch.Code = count.ToString().PadLeft(2, '0');
+        StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        await Form.ParentSubmit();
+    }
+    private async Task Create()
+    {
+        BranchVM.Exception = null;
+        BranchVM createdBranchVM = await BranchService.CreateBranch(BranchVM);
+
+        if (string.IsNullOrEmpty(createdBranchVM.Exception))
+        {
+            await JSRuntime.Notfication($"Branch {BranchVM.Branch.Name} has been created successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+            NavigationManager.NavigateTo($"/branch/{createdBranchVM.Branch.Id}");
+        }
+        else
+        {
+            await JSRuntime.Notfication(createdBranchVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+        }
+    }
+}

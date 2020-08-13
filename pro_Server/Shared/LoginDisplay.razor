@@ -1,0 +1,55 @@
+﻿@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="row">
+    <div class="col-9">
+        <LangDropdown>
+            <InitialTip><i class="fas fa-globe"></i> </InitialTip>
+        </LangDropdown>
+    </div>
+    <div class="col-3">
+        <AuthorizeView>
+            <Authorized Context="user">
+
+                <AttAccountDropdown>
+                    <InitialTip><i class="far fa-user"></i>&ensp;@user.User.Identity.Name</InitialTip>
+                </AttAccountDropdown>
+
+
+            </Authorized>
+            <NotAuthorized Context="user">
+
+                <a href="/login" style="background-color:transparent; color:#343a40; font-size: 12px;"> Log In</a> &ensp;
+                <a href="/signup" style="background-color:transparent; color:#343a40; font-size: 12px;">Register</a>
+
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+
+
+@code
+{ 
+    [Inject] public ILanguageContainerService LCS { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    bool ShowIdentity;
+    bool ShowAnynoms;
+
+    string Lang = "English";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(await JSRuntime.GetFromLocalStorage("CultureCode") == "ar-SA")
+        {
+            Lang = "عربي";
+        }
+    }
+
+    public async Task Logout()
+    {
+        await ((pro_Server.Auth.JWTAuthenticationStateProvider)AuthenticationStateProvider).Logout();
+        NavigationManager.NavigateTo("");
+    }
+}

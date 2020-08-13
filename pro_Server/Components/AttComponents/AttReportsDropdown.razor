@@ -1,0 +1,36 @@
+﻿@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<div class="dropdown" style="margin-top:2px;">
+    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button"
+            style="background-color:transparent; color:#343a40; border:none;"
+            @onclick="e => this.show=!this.show"
+            @onfocusout=@(e => this.show=menuState)
+            aria-haspopup="true" aria-expanded="false">
+        @Tip
+    </button>
+
+    <div class="dropdown-menu @(show? "show":"")"
+         @onmouseover=@(()=> menuState = true)
+         @onmouseout=@(()=> menuState = false)>
+
+        <a class="dropdown-item" href="report" @onclick=@(()=>show = false)>
+            <i class="far fa-file-alt"></i>&ensp; Reports
+        </a>
+
+    </div>
+</div>
+
+@code {
+
+    [Parameter]public RenderFragment InitialTip { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    private bool show = false;
+    private bool menuState = false;
+    private RenderFragment Tip;
+
+    protected override void OnInitialized() { this.Tip = InitialTip; }
+
+}

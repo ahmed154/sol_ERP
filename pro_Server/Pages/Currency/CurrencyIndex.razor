@@ -1,0 +1,70 @@
+@page "/currency"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;">Currencies</span>
+        </div>
+        <div class="row pt-4">
+            <a class="btn btn-primary" href="/currency/new" style="background-color:#6372C4"><i class="far fa-file"></i> New</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    @if (CurrencyVMs == null)
+    {
+        <p style="color:gray;">Loading ...</p>
+    }
+    else if (CurrencyVMs.Count() == 0)
+    {
+        <p style="color:gray;">No records to display.</p>
+    }
+    else
+    {
+        <SfGrid DataSource="@CurrencyVMs" AllowPaging="true" AllowSorting="true">
+            <GridEvents RowSelected="RowSelectHandler" TValue="CurrencyVM"></GridEvents>
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="Currency.Id" HeaderText="ID" Width="50" />
+                <GridColumn Field="Currency.Name" HeaderText="Name" Width="200" />
+            </GridColumns>
+        </SfGrid>
+    }
+</div>
+
+
+@code 
+{
+    [Inject] public ICurrencyService CurrencyService { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    public List<CurrencyVM> CurrencyVMs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrencyVMs =(await CurrencyService.GetCurrencies()).OrderByDescending(x => x.Currency.Id).ToList();
+        if (CurrencyVMs.Count > 0 && !string.IsNullOrEmpty(CurrencyVMs[0].Exception))
+        {
+            await JSRuntime.Notfication(CurrencyVMs[0].Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+        }
+    }
+
+    public void RowSelectHandler(RowSelectEventArgs<CurrencyVM> args)
+    {
+        NavigationManager.NavigateTo($"currency/{args.Data.Currency.Id}");
+    }
+}
+
+
+ <style>
+            .e-grid .e-headercelldiv {
+                background-color: #F2F3F4;
+                font-size: 16px;
+            }
+
+            .e-grid .e-rowcell {
+                font-size: 14px;
+            }
+ </style>

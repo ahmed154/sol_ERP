@@ -1,0 +1,54 @@
+@page "/fiscalyear/edit/{id:int}"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;"><a href="/fiscalyear" style="color:#6372C4">FiscalYears</a>  /  @id</span>
+        </div>
+        <div class="row pt-4">
+            <button class="btn btn-primary" type="submit" @onclick=@(()=> Save()) style="background-color:#6372C4"><i class="far fa-save"></i> Save</button>
+            <a class="btn border ml-1" href="/fiscalyear/@id"><i class="fas fa-undo"></i> Cancel</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    <FiscalYearForm FiscalYearVM="FiscalYearVM" ecb_Save="Update" Type="Edit" @ref="Form"/>
+</div>
+
+    @code {
+
+        [Inject] public IFiscalYearService FiscalYearService { get; set; }
+        [Inject] public IJSRuntime JSRuntime { get; set; }
+        [Inject] NavigationManager NavigationManager { get; set; }
+        [Parameter] public int id { get; set; }
+
+        FiscalYearVM FiscalYearVM { get; set; } = new FiscalYearVM();
+        protected FiscalYearForm Form;
+
+        protected override async Task OnInitializedAsync()
+        {
+            FiscalYearVM = await FiscalYearService.GetFiscalYear(id);
+        }
+
+        private async Task Save()
+        {
+            await Form.ParentSubmit();
+        }
+
+        private async Task Update()
+        {
+            FiscalYearVM.Exception = null;
+            FiscalYearVM updatedFiscalYearVM = await FiscalYearService.UpdateFiscalYear(FiscalYearVM.FiscalYear.Id, FiscalYearVM);
+
+            if (string.IsNullOrEmpty(updatedFiscalYearVM.Exception))
+            {
+                await JSRuntime.Notfication($"FiscalYearment {FiscalYearVM.FiscalYear.Name} has been updated successfully!", IJSRuntimeExtensionMethods.SweetAlertMessageType.success, 3000);
+                NavigationManager.NavigateTo($"/fiscalyear/{updatedFiscalYearVM.FiscalYear.Id}");
+            }
+            else
+            {
+                await JSRuntime.Notfication(updatedFiscalYearVM.Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+            }
+        }
+    }

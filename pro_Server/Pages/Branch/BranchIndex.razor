@@ -1,0 +1,70 @@
+@page "/branch"
+
+<div class="container bg-white rounded border p-3">
+    <div class="pl-3">
+        <div class="row">
+            <span style="font-size:18px; color:#8f8f8f;">Branchs</span>
+        </div>
+        <div class="row pt-4">
+            <a class="btn btn-primary" href="/branch/new" style="background-color:#6372C4"><i class="far fa-file"></i> New</a>
+        </div>
+    </div>
+</div>
+
+<div class="container bg-white border box-shadow p-3 rounded">
+    @if (BranchVMs == null)
+    {
+        <p style="color:gray;">Loading ...</p>
+    }
+    else if (BranchVMs.Count() == 0)
+    {
+        <p style="color:gray;">No records to display.</p>
+    }
+    else
+    {
+        <SfGrid DataSource="@BranchVMs" AllowPaging="true" AllowSorting="true">
+            <GridEvents RowSelected="RowSelectHandler" TValue="BranchVM"></GridEvents>
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="Branch.Id" HeaderText="ID" Width="50" />
+                <GridColumn Field="Branch.Name" HeaderText="Name" Width="200" />
+            </GridColumns>
+        </SfGrid>
+    }
+</div>
+
+
+@code 
+{
+    [Inject] public IBranchService BranchService { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+    [Inject] public IJSRuntime JSRuntime { get; set; }
+
+    public List<BranchVM> BranchVMs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        BranchVMs =(await BranchService.GetBranchs()).OrderByDescending(x => x.Branch.Id).ToList();
+        if (BranchVMs.Count > 0 && !string.IsNullOrEmpty(BranchVMs[0].Exception))
+        {
+            await JSRuntime.Notfication(BranchVMs[0].Exception, IJSRuntimeExtensionMethods.SweetAlertMessageType.error, 10000);
+        }
+    }
+
+    public void RowSelectHandler(RowSelectEventArgs<BranchVM> args)
+    {
+        NavigationManager.NavigateTo($"branch/{args.Data.Branch.Id}");
+    }
+}
+
+
+ <style>
+            .e-grid .e-headercelldiv {
+                background-color: #F2F3F4;
+                font-size: 16px;
+            }
+
+            .e-grid .e-rowcell {
+                font-size: 14px;
+            }
+ </style>
